@@ -6,5 +6,7 @@ A Lightweight Responsive Grid Builder
 WIKI:
 http://gokulvanan.github.io/respo.grid
 
-![grid expanded](img/screehshot1.png)
-![grid expanded](img/screehshot1.png)
+![grid ](img/screehshot1.png)
+![grid ](img/screehshot2.png)
+![grid ](img/screehshot3.png)
+![grid ](img/screehshot4.png)
