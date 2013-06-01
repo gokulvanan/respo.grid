@@ -1,0 +1,97 @@
+body {
+	margin: 15px;
+}
+
+fieldset {
+	color: #000000;
+}
+
+.respo_details_backdrop { /*margin-top:5px;*/
+	font-size: 12px;
+	/*font-weight: bold;*/
+	color: #000000;
+	background-color: #eeeeee;
+}
+
+
+
+.respo_header_backdrop {
+	margin-top: 5px;
+	font-size: 14px;
+	background-color: gainsboro;
+}
+
+.pagination {
+	margin: 5px 0;
+}
+
+.floatingHeader {
+	position: relative;
+	top: 0;
+	z-index: 200;
+	/*visibility: ;*/
+}
+
+/*override bootstrap settings for tablebordered*/
+.table th {
+	padding: 8px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+	border-top: 1px solid #dddddd;
+}
+
+select.respo { /*width: 50px;
+	font-size: 12px;
+ 	font-weight: normal;
+  	/*line-height: 20px;*/ /*display: inline-block;*/
+	background-color: : #FFF;
+	height: 18px;
+	padding: 0px 0px;
+	margin-bottom: 0px;
+	color: #555555;
+	vertical-align: middle;
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+	*/
+}
+
+select.respo_curr_page {
+	background: transparent;
+	width: 25px;
+	vertical-align: middle;
+	padding: 0px;
+	border: 0;
+	border-radius: 0;
+	line-height: 1;
+	/*height: 20px;*/
+	-webkit-appearance: none;
+}
+
+/*Added this as custom css */
+.input-micro {
+	width: 35px;
+}
+
+/*#d9edf7;*/
+th.respo_header_active{
+		/*background-color: lightgrey;*/
+}
+/*div.respoGrid {*/ /* background: $bgcolor;
+    border: 1px solid $bgcolor;*/ /*display: inline-block;
+    height: 400px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;*/
+	/*padding: ($rowHeight + ($cellPadding * 2)) 0;*/
+	/*  table { position: static; }
+    thead, tfoot { position: absolute; z-index: 1   }
+    thead { left: 0; top: 0; }
+    tfoot { left: 0; bottom: 0; }
+    tbody { 
+        display: block;
+        position: relative; overflow-y: scroll;
+        height: 200px;
+        width: 100%;
+    }*/ /*}*/
