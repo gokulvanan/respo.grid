@@ -617,7 +617,7 @@ define(function () {
             pagn.push('<option value="'+i+'">'+i+'</option>');
         }
         pagn.push("</select></span> </li>");
-        if(page == totalPages) pagn.push('<li class="disabled">');
+        if(totalPages === 0 || page === totalPages) pagn.push('<li class="disabled">');
         else                 pagn.push('<li >');
         pagn.push('<a class="respo_pagn" href="#">Next</a></li>');   
         return pagn.join(" ");      
@@ -811,11 +811,11 @@ define(function () {
             
     function updateGrid(opts, $elm){
         var data= opts.data;
-        // // opts.log($elm);
+        // // console.log($elm);
         var $tbody = $elm.find("tbody");
         // log($tbody.html());
         var $tr = $tbody.find("tr:first");
-         // opts.log($tr);
+         // console.log($tr);
         for(var i=0; i<opts.data.length; i++){
             var row= data[i];
             // if(row.id) $tr.attr("id",row.id);
@@ -825,9 +825,14 @@ define(function () {
                 var def = opts.colDefs[j];
                 var content = (def.format)? def.format(row[def.name],row) : row[def.name];
                 var $span = $td.find("span.respo_content_"+def.name);
-                var $input = $span.find("input");
-                if($input.length === 0) $span.html(content);
-                else $input.val(content);
+                if(def.editable){
+                    var $input = $span.find("input");
+                    if($input.length === 0) $span.html(content);
+                    else                    $input.val(content);
+                }else{
+                     $span.html(content);
+                }
+               
                 $td = $td.next();
             }
             $tr = $tr.next();
