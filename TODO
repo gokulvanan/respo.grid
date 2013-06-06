@@ -1,8 +1,9 @@
 TODO
 
 
-
-- escape to erase search optsion -done
+- change width in rowsPerPage to accomodate 3 and 4 digit numbers
+- sorting symbol should not necessarily wait column.. so sorting works when sorted on hidden col or when sortCOl is not specified by default + provide cascade sorting feature
+- Table on ajax load intialy streaches and then resizes.. need to check if we could have it resized first
 - search on enter to be validated
 - truncate tool tip add on
 - webstore cache and webworker
