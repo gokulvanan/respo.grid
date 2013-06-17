@@ -13,7 +13,7 @@ define(function () {
         "divId":null,
         "colDefs":[],
         "width":0.985,
-        "height":0.4,
+        "height":0.7,
         "localData":[],
         "params":{},
         "source":"local",// ajax / loadOnSearch
@@ -71,7 +71,7 @@ define(function () {
 
         //build gridHeader
         var table = new Array();
-        table.push('<table id="head_'+divId+'" class="table table table-bordered table-striped" style="margin-bottom:0px;table-layout:fixed;">');
+        table.push('<table id="head_'+divId+'" class="table table-bordered table-striped" style="margin-bottom:0px;table-layout:fixed;">');
         buildHeader(table,opts);
         table.push('</table>');
         var $head = $(table.join(""));
@@ -283,7 +283,7 @@ define(function () {
 
     function buildTableFromData(opts,divId,$bodyDiv,$div,$head){
         var table = new Array();
-        table.push('<table id="body_'+divId+'" class="table table table-bordered table-striped " style="table-layout:fixed;">');
+        table.push('<table id="body_'+divId+'" class="table table-bordered table-striped " style="table-layout:fixed;">');
         buildBody(table,opts);
         table.push('</table>');
         var $table = $(table.join(""));
@@ -409,7 +409,7 @@ define(function () {
     function search(opts,params){
     	var divId=opts.divId;
         //search from ajax data 
-        if(opts.source==='ajax' || opts.source === 'loadOnSearch'){
+            opts.page=1;// default to first page
             loadingWait(opts); // avoid processing new search req when previous is loading
             opts.searchFlag=(opts.source === 'loadOnSearch');
             params = (params) ? params : getSerchParams(SEARCH_CLASS); // add search params 
@@ -424,14 +424,8 @@ define(function () {
                 $("select.respo_curr_page",$caption).bind("change",function(event){ pagnButtonClick(this,args,$caption,divId);});
                 $("a.respo_pagn",$caption).bind("click",function(event){ event.preventDefault();  pagnButtonClick(this,args,$caption,divId);});
 
-             });
-        }else if(opts.source === 'local'){
-            //TODO
-            alert("Local data search is Under Construction");
-        }
-        else{
-            throw "Invalid Source";
-        }
+            });
+        
     }
     
 
@@ -512,19 +506,55 @@ define(function () {
     }
 
     function getLocalData(opts){
-            var i = (opts.page -1) * opts.rowsPerPage;
-            var j = ((i+opts.rowsPerPage) < opts.localData.length) ? i+opts.rowsPerPage : opts.localData.length;
-            // opts.log(i+"_"+j);
-            return opts.localData.slice(i,j);
+        var i = (opts.page -1) * opts.rowsPerPage;
+        var j = ((i+opts.rowsPerPage) < opts.localData.length) ? i+opts.rowsPerPage : opts.localData.length;
+        var data = localDataFilter(opts); // called if local search params are sent to filter results
+        return Array.prototype.slice.call(data,i,j);
     }
     
    
-    
-//    function getListHandler(response){
-//       opts.total=response[opts.paramNames["total"]];// TODO check need for retriving page and rowsPerpage 
-//         opts.ajaxData[opts.paramNames["data"]];
-//    }
-//    
+   /**
+   *    Filters local data based on search Params
+   */
+    function localDataFilter(opts){
+        var validRows = new Array();
+        var searchParams=getValidSearchParams(opts.params,opts.localData[0]);
+        if(!searchParams) return opts.localData;
+        for(var i=0, len=opts.localData.length; i<len; i++){
+            var row = opts.localData[i];
+              if(searchSatisfied(row,searchParams)){
+                Array.prototype.push.call(validRows,row);
+            }
+        }
+        return validRows;
+    } 
+
+    function searchSatisfied(row,searchParams){
+        var satisfied=true;
+        for(var p in searchParams){
+            if(searchParams[p] !== row[p]){
+                satisfied = false;
+                break;
+            }   
+        }
+        return satisfied;                
+    }
+
+    function getValidSearchParams(params,row){
+        var searchParam = null;
+        for(var p in params){
+            if(row[p] !== undefined){
+                try{
+                    searchParam[p]=params[p];  
+                }catch(err){
+                    searchParam={};
+                    searchParam[p]=params[p];  
+                }
+            } 
+        }
+        return searchParam;
+    }
+
     function buildCaption(opts){
         var caption = new Array();
         caption.push('<div  id="resp_caption" >')
