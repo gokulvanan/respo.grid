@@ -227,7 +227,11 @@ define(function () {
         beforeAjaxCall(opts);// helper method to show loading div etc
             opts.getList(opts.params,function (response){
                 var obj= opts.getListHandler(response);
-                // opts.log(obj);
+                // console.log(obj);
+                if(!obj){
+                    console.log()
+                    return; // do nothing incase of no response
+                }
                 opts.data =  obj[opts.paramNames.data];
                 opts.total = obj[opts.paramNames.total];
                 afterAjaxCall(opts); // helper method to remove loading div, cleaup.. no data msg + error reporting
@@ -649,12 +653,17 @@ define(function () {
     	var dir="asc";
     	loadingWait(opts); // avoid processing new sort req when previous is loadingv
     	var prevHeader =$("th.respo_header_active");
-    	prevHeader.attr("class",prevHeader.attr("class").replace("respo_header_active",""));
+        if(prevHeader.length !== 0){ // headerElmExist
+    	   prevHeader.attr("class",prevHeader.attr("class").replace("respo_header_active",""));
+        }
     	$(elm).attr("class",$(elm).attr("class")+" respo_header_active");
     	var sortElm = $("a.respo_sort_active",$(elm));
-    	if(sortElm.length === 0){
+    	if(sortElm.length === 0){ // sortElm does not exist
     		$("a.respo_sort_icon").hide();
-    		$("a.respo_sort_active").attr("class", $("a.respo_sort_active").attr("class").replace("respo_sort_active",""));
+            sortElm = $("a.respo_sort_active");
+            if(sortElm.length !== 0){ // sortElm exist
+    		  sortElm.attr("class", sortElm.attr("class").replace("respo_sort_active",""));
+            }
     		elm = $("a.respo_sort_up",$(elm));
     		elm.attr("class",elm.attr("class")+" respo_sort_active ");
     		elm.show();
