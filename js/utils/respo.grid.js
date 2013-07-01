@@ -64,7 +64,7 @@ define(function () {
  
         // helper utility function used in pagination
         opts.getTotalPages = function(){
-            var total = (this.source==="local") ? this.localData.length : ((this.total)? this.total : this.data.length);
+            var total = (this.source==="local") ? this.buff.length : ((this.total)? this.total : this.data.length);
             var rowsPerPage = this.rowsPerPage
             return (total % opts.rowsPerPage == 0) ? (total/opts.rowsPerPage) : parseInt((total/opts.rowsPerPage)) + 1;
         }
@@ -506,9 +506,10 @@ define(function () {
     }
 
     function getLocalData(opts){
-        var i = (opts.page -1) * opts.rowsPerPage;
-        var j = ((i+opts.rowsPerPage) < opts.localData.length) ? i+opts.rowsPerPage : opts.localData.length;
         var data = localDataFilter(opts); // called if local search params are sent to filter results
+        opts.buff=data;
+        var i = (opts.page -1) * opts.rowsPerPage;
+        var j = ((i+opts.rowsPerPage) < opts.buff.length) ? i+opts.rowsPerPage : opts.buff.length;
         return Array.prototype.slice.call(data,i,j);
     }
     
