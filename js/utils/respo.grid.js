@@ -13,14 +13,17 @@ define(function () {
         "divId":null,
         "colDefs":[],
         "width":0.985,
-        "height":0.7,
+        "height":$(window).height()/1550,
         "localData":[],
         "params":{},
         "source":"local",// ajax / loadOnSearch
         "searchDiv": null,
         "searchOnEnter":true,
         "afterGridLoad":null,
-        "priority": Number.MAX_VALUE,       
+        "priority": Number.MAX_VALUE,   
+		"roleAccessFilter":window.roleAccessFilter || null, //added for roleAccess windw.roleAccessFilter is in menu.js
+        "hasAcessPermission":window.hasAcessPermission || null, //added for roleAccess window.hasAcessPermission is in menu.js
+           
         "paramNames":{"page":"page","rowsPerPage": "rowsPerPage","sortCol":"orderBy","sortDir":"asc","total":"total","data":"data"},
         "getList":null, // function called during AJAX load input args contains params of gird , output json with total and data fields
         "getListHandler":null, // handler function handle json response
@@ -148,7 +151,16 @@ define(function () {
                 			search.push('<input class=" " id="'+autocompleteOpts.keyval+'" type="hidden" value="'+hidVal+'"/>');
                 		}
                 	}
-                    search.push('<input class="search input-'+size+'"  placeholder="'+placeHolder+'" id="'+def.name+'" type="text" value="'+val+'"/>')
+                    // search.push('<input class="search  respo_date_picker input-'+size+'"  placeholder="'+placeHolder+'" id="'+def.name+'" type="text" value="'+val+'"/>')
+                    if(searchOpts.date)
+                    {
+                        search.push('<input class="search  respo_date_picker input-'+size+'"  placeholder="'+placeHolder+'" id="'+def.name+'" type="text" value="'+val+'" readonly="readonly"/>');
+                        search.push('<span class="add-on respo_date_picker"><i class="icon-calendar"></i></span>');
+                    } 
+                    else
+                    {
+                        search.push('<input class="search  respo_date_picker input-'+size+'"  placeholder="'+placeHolder+'" id="'+def.name+'" type="text" value="'+val+'"/>');
+                    }
                 }else if (type === 'dropdown'){
                     var dropDownOpts =  searchOpts.opts || {};
                     search.push("<select class='search input-"+size+"' id='"+def.name+"' >");
@@ -249,8 +261,9 @@ define(function () {
         var rowsPerPage = opts.params[paramNames.rowsPerPage];
         var dir = opts.params[paramNames.sortDir];
         dir = (dir === "asc" )? true : false;
-        page = (page-1)*rowsPerPage;
-        
+        if(page && rowsPerPage){ // they are undefined for other cases
+        	page = (page-1)*rowsPerPage;
+        }
         opts.params[paramNames.sortDir]=dir;
         opts.params[paramNames.page]= page;
     }
@@ -258,8 +271,9 @@ define(function () {
     function afterAjaxCall(opts){
         if(opts.source === "loadOnSearch"){
             opts.searchFlag=false;// search flag reset.. to keep pagination and sorting as local calls its set during every serach call
-            opts.localdata=[]; // as localData needs to be populate
-            opts.localdata=opts.data;
+            opts.localData=[]; // as localData needs to be populate
+            opts.localData=opts.data;
+            opts.localData.sort(function(a,b){return sort(a,b,opts.sortCol,opts.sortDir)});// sort data
             opts.data=getLocalData(opts);
         }
         opts.wait=false;// flag reset to enable click actions on other buttons after loading is done
@@ -506,8 +520,9 @@ define(function () {
     }
 
     function getLocalData(opts){
-        var data = localDataFilter(opts); // called if local search params are sent to filter results
-        opts.buff=data;
+    	var data = (opts.source='loadOnSearch') ? opts.localData  : localDataFilter(opts); // called if local search params are sent to filter results (NOTE: applicable only for local source)
+    	data=(data)? data : []; // data is empty array incase its undefined
+    	opts.buff=data;
         var i = (opts.page -1) * opts.rowsPerPage;
         var j = ((i+opts.rowsPerPage) < opts.buff.length) ? i+opts.rowsPerPage : opts.buff.length;
         return Array.prototype.slice.call(data,i,j);
@@ -570,7 +585,7 @@ define(function () {
         var pageOpts = opts.pageOpts , rowsPerPage=opts.rowsPerPage;
         // build rowsPerPage Div and init page = 1
         pagn.push('<div id="rowsPerPage_div" class="btn-group pull-left">');
-        pagn.push('<button class="btn  btn-small disabled"><b>Dislplay Records : ');// TODO remove inline styling
+        pagn.push('<button class="btn  btn-small disabled"><b>Display Records : ');// TODO remove inline styling
         pagn.push('<span id="respo_rows_per_page_val">'+opts.pageOpts[0]+'</span>');
         pagn.push('</b></button>');
         pagn.push('<button class="btn  btn-small dropdown-toggle "  data-toggle="dropdown">');
@@ -594,7 +609,7 @@ define(function () {
 
     function buildActions(opts){
         actionHandlerMap = {}; // reset
-        var acts = opts.actions;
+        var acts = (opts.roleAccessFilter) ? opts.roleAccessFilter(opts.actions) : opts.actions; // role access Filter added
         var actions = new Array();
         actions.push('<div id="respo_actions" class="pull-right" style="margin-right:10px;">');
         
@@ -715,9 +730,8 @@ define(function () {
     	var col = $(elm).attr("id");
     	col = col.substring(0,col.length-3);
     	removeDetailsWindow();
-    	if(opts.source === "local"){
-    		var data = opts.localData;
-    		data.sort(function(a,b){return sort(a,b,col,dir)});  
+    	if(opts.source === "local" || opts.source === "loadOnSearch"){
+    		opts.localData.sort(function(a,b){return sort(a,b,col,dir)});  
     	}else{ // ajax call
     		opts.sortCol=col; // update params used in making getListReq
     		opts.sortDir=dir; // update params used in making getListreq
@@ -881,6 +895,9 @@ define(function () {
     }
 
     function reBuildBody(opts,divId){
+		if($('input#selectAll').is(":checked")){
+    		$('input:checkbox[id=selectAll]').attr('checked',false);
+    	} 
          // opts.log(divId);
         var $table = $("table#body_"+divId);
         // $table.html("Loading... ");
@@ -929,20 +946,30 @@ define(function () {
                   table.push("<a href='#' class='respo_minimize icon-collapse-alt icon-large' style='display:none;' >&nbsp;</a>&nbsp;")  
                 } 
                 table.push("<span id='respo_content_"+def.name+"_"+i+"' class='respo_content_"+def.name+"'>");
+                var editFlag=false;
                 if(def.editable){
-                    var editOpts=def.editOpts;
-                    var size = editOpts.size || "small";
-                    editableColsMap[def.name]=editOpts;
-                    table.push('<div class="input-append ">');
-                    table.push("<input id='respo_inline_edit_content~"+def.name+"~"+i+"' type='text' readonly='readonly' class='input-"+size+" respo_inline_edit_content_"+def.name+"' value='");
-                    table.push((def.format)? def.format(row[def.name],row) : row[def.name]);
-                    table.push("'/>");
-                    table.push('<span class="add-on">');
-                    table.push("&nbsp;<a href='#' class='respo_inline_edit icon-edit ' title='Edit'   >&nbsp;</a>");    
-                    table.push("&nbsp;<a href='#' class='respo_inline_edit_save icon-save' title='Save' style='display:none;'  >&nbsp;</a>");    
-                    table.push("&nbsp;<a href='#' class='respo_inline_edit_cancel icon-ban-circle' title='Cancel' style='display:none;'  >&nbsp;</a>");
-                    table.push('</span>');
-                    table.push('</div>');
+                	editFlag=true;
+                	if(opts.hasAcessPermission){ //added for role access integrations
+                		editFlag=opts.hasAcessPermission(def.name);
+                		console.log("roleAccessCall");
+                	}
+                	if(editFlag){
+                		 var editOpts=def.editOpts;
+                         var size = editOpts.size || "small";
+                         editableColsMap[def.name]=editOpts;
+                         table.push('<div class="input-append ">');
+                         table.push("<input id='respo_inline_edit_content~"+def.name+"~"+i+"' type='text' readonly='readonly' class='input-"+size+" respo_inline_edit_content_"+def.name+"' value='");
+                         table.push((def.format)? def.format(row[def.name],row) : row[def.name]);
+                         table.push("'/>");
+                         table.push('<span class="add-on">');
+                         table.push("&nbsp;<a href='#' class='respo_inline_edit icon-edit ' title='Edit'   >&nbsp;</a>");    
+                         table.push("&nbsp;<a href='#' class='respo_inline_edit_save icon-save' title='Save' style='display:none;'  >&nbsp;</a>");    
+                         table.push("&nbsp;<a href='#' class='respo_inline_edit_cancel icon-ban-circle' title='Cancel' style='display:none;'  >&nbsp;</a>");
+                         table.push('</span>');
+                         table.push('</div>');
+                	}else{
+                		table.push((def.format)? def.format(row[def.name],row) : row[def.name]);
+                	}
                 }else{
                     table.push((def.format)? def.format(row[def.name],row) : row[def.name]);
                 }
@@ -994,10 +1021,7 @@ define(function () {
         table.push("</tr>");
         table.push("</thead>");
 
-        hideableCols.sort(function(a,b){
-            var val = a.priority - b.priority
-            return (val === 0) ? (a.minWidth - b.minWidth) : val;
-        }); // sort by minWidth desc
+        hideableCols.sort(function(a,b){ return sort(a,b,"minWidth","asc");}); // sort by minWidth desc
     }
 
     
