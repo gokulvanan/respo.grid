@@ -103,10 +103,10 @@ define(function () {
         opts.divId = divId;
         opts.$bodyDiv = $bodyDiv;
         
-        opts.log(opts.params);
+        console.log(opts.params);
         //set data based on rowsPerPage
         processData(opts,function(args){
-            opts.log(args.data);
+            console.log(args.data);
             buildTableFromData(args,divId,$bodyDiv,$div,$head);
         });
         
@@ -177,7 +177,7 @@ define(function () {
         }
         search.push('<button id="go" class="btn respo_search " type="button">Go!</button>');
         $div.html(search.join(" "));
-        opts.log(autoCompleteElms);
+        console.log(autoCompleteElms);
         for(var elName in autoCompleteElms){ // initialize autocomplete opts if any
         	var autoOpts=autoCompleteElms[elName];
         	$("input#"+elName).typeahead({
@@ -284,7 +284,7 @@ define(function () {
         opts.$loading.hide();
         $("div#respoGridBody_"+opts.divId).show();
         if(opts.afterGridLoad)	opts.afterGridLoad(); // after gridLoad function can be called via client
-        opts.log("HERE IN AFTER BUILDING GRID");
+        console.log("HERE IN AFTER BUILDING GRID");
     }
 
     function beforeBuildingGrid(opts){
@@ -292,10 +292,11 @@ define(function () {
         
         opts.$loading.show();
         $("div#respoGridBody_"+opts.divId).hide();
-        opts.log("HERE IN BEFORE BUILDING GRID");
+        console.log("HERE IN BEFORE BUILDING GRID");
    }
 
     function buildTableFromData(opts,divId,$bodyDiv,$div,$head){
+        console.log(opts.source);
         var table = new Array();
         table.push('<table id="body_'+divId+'" class="table table-bordered table-striped " style="table-layout:fixed;">');
         buildBody(table,opts);
@@ -313,7 +314,7 @@ define(function () {
 
         $("a.respo_expand",$table).bind("click",function(event){ event.preventDefault(); showDetails(this,opts);});
         $("a.respo_minimize",$table).bind("click",function(event){ event.preventDefault();  hideDetails(this);});
-        $("th.respo_sort",$head).bind("click",function(event){ sortCol(this,opts,divId);});
+        $("th.respo_sort",$head).bind("click",function(event){ sortCol(this,opts,divId,$caption);});
 //        $("a.respo_sort_up",$head).bind("click",function(event){ event.preventDefault(); sortCol(this,opts,divId,"desc");});
 //        $("a.respo_sort_down",$head).bind("click",function(event){ event.preventDefault();  sortCol(this,opts,divId,"asc");});
 
@@ -324,25 +325,26 @@ define(function () {
         // initSort($head);
         initEditableCols(opts);
         resize($table,opts);
+        console.log(opts.source);
     }
     
     function initEditableCols(opts){
-        opts.log(editableColsMap);
+        console.log(editableColsMap);
         // for(var key in editableColsMap){
-            // opts.log("a.respo_inline_edit_"+key);
+            // console.log("a.respo_inline_edit_"+key);
         $("a.respo_inline_edit").click(function(event){
                 event.preventDefault();
                 var edit   = $(this);
                 var input  = edit.parent().prev();
                 var save   = edit.next();
                 var cancel = save.next();
-                var obj = getEditableRowCol(input);
+                var obj = getEditableRowCol(input,opts);
                 var func = editableColsMap[obj.col];
-                opts.log(func);
+                console.log(func);
                 var buff = func.buff || {};
                 buff[obj.row]=input.val(); // buffer the val
                 editableColsMap[obj.col].buff=buff;
-                opts.log(editableColsMap);
+                console.log(editableColsMap);
                 showEditFieldDetails(input,save,cancel,edit);
                 if(func.onStart) func.onStart(input);
          }); 
@@ -355,7 +357,7 @@ define(function () {
                 var input = edit.parent().prev();
                 var obj = getEditableRowCol(input);
                 var func = editableColsMap[obj.col];
-                opts.log(func);
+                console.log(func);
                 var buff = func.buff || {};
                 if(!buff || !buff[obj.row]) throw "Error in initEditableCols";
                 input.val(buff[obj.row]);
@@ -369,7 +371,7 @@ define(function () {
                 var cancel = save.next();
                 var edit = save.prev();
                 var input = edit.parent().prev();
-                var obj = getEditableRowCol(input);
+                var obj = getEditableRowCol(input,opts);
                 var func = editableColsMap[obj.col];
                 var newVal = input.val();
              
@@ -412,7 +414,7 @@ define(function () {
         var vals = elm.attr("id").split("~");
         var row = vals.pop();
         var col = vals.pop();
-        opts.log(row+"_"+col);
+        console.log(row+"_"+col);
            
         return{
             "row":row,
@@ -471,7 +473,7 @@ define(function () {
     }
  
     function pagnButtonClick(elm,opts,$caption,divId){
-        // // opts.log($(elm).is("select"));
+        // // console.log($(elm).is("select"));
         loadingWait(opts); // avoid processing new pagn req when previous is loading
         var $elm = $(elm);
         var elmType = $elm[0].nodeName.toLowerCase();
@@ -480,20 +482,20 @@ define(function () {
         }else{
              if($elm.parent().attr("class") === 'disabled') return; // do nothing for a disabled button
              if($elm.html() === "Next"){
-                    opts.page++; // opts.log("next");
+                    opts.page++; // console.log("next");
              }   
              else {
-                opts.page--;// opts.log("previous");
+                opts.page--;// console.log("previous");
              }
              $("select.respo_curr_page",$caption).val(opts.page);                        
         }
-        // opts.log("PagnButtonClick");
-        // opts.log(opts.page);
-        // opts.log(opts.rowsPerPage);
+        // console.log("PagnButtonClick");
+        // console.log(opts.page);
+        // console.log(opts.rowsPerPage);
         processData(opts,function(args){
             /*var tableBody = $("table#body_"+divId);
             updateGrid(args,tableBody);*/
-            // opts.log(opts.data);
+            // console.log(opts.data);
             reBuildBody(args,divId);
             enableDisablePagnButtons(args,$caption);   
         });
@@ -510,17 +512,17 @@ define(function () {
          });
          
          if(opts.page === opts.getTotalPages()){
-            // opts.log("Disable Next");
+            // console.log("Disable Next");
             next.attr("class","disabled"); // disable next
          }  
          else if(opts.page === 1){
-            // opts.log("Disable Previous");
+            // console.log("Disable Previous");
             previous.attr("class","disabled"); // disable previous
          }                
     }
 
     function getLocalData(opts){
-    	var data = (opts.source='loadOnSearch') ? opts.localData  : localDataFilter(opts); // called if local search params are sent to filter results (NOTE: applicable only for local source)
+    	var data = (opts.source==='loadOnSearch') ? opts.localData  : localDataFilter(opts); // called if local search params are sent to filter results (NOTE: applicable only for local source)
     	data=(data)? data : []; // data is empty array incase its undefined
     	opts.buff=data;
         var i = (opts.page -1) * opts.rowsPerPage;
@@ -616,7 +618,7 @@ define(function () {
         for(var i=0,len=acts.length; i<len; i++){
         	var color = acts[i].color || "";
         	color = COLOR_MAP[color] ;
-        	opts.log(color);
+        	console.log(color);
         	if(acts[i].modal){
         		
         		actions.push('<a href="#'+acts[i].modal+'" role="button" class="respo_btns btn '+color+' btn-small" data-toggle="modal" data-loading-text="'+acts[i].loading+'">')
@@ -695,7 +697,7 @@ define(function () {
     }
   
   
-    function sortCol(elm,opts,divId){
+    function sortCol(elm,opts,divId,$caption){
     	var dir="asc";
     	loadingWait(opts); // avoid processing new sort req when previous is loadingv
     	var prevHeader =$("th.respo_header_active");
@@ -736,14 +738,34 @@ define(function () {
     		opts.sortCol=col; // update params used in making getListReq
     		opts.sortDir=dir; // update params used in making getListreq
     	}
+        opts.page=1;
+        opts.data=getLocalData(opts);
     	processData(opts, function(args){
+            //reset pagn option
+            var pgs = opts.getTotalPages();
+            if(pgs > 0){
+                $("select.respo_curr_page").val(1);
+            }
+            var pagnParams = $("a.respo_pagn",$caption);
+            pagnParams.attr("class","respo_pagn respo_pagn_disabled");
+            pagnParams.parent().attr("class","disabled");
+            if(pgs > 0) {
+                $("a.respo_pagn",$caption).each(function(){
+                   if($(this).html() === "Next"){
+                      $(this).attr("class","respo_pagn");
+                      console.log($(this));
+                      console.log($(this).parent());
+                      $(this).parent().attr("class","");
+                   }
+                }); //enable next button
+            }
     		updateGrid(args,tableBody);
     	});
     }
 
     function toggleSortCols(elm,divId,dir){
     	$(elm).hide();
-    	opts.log($(elm).next());
+    	console.log($(elm).next());
     	if(dir === 'asc'){
     		$(elm).next().show();
     	}else{
@@ -819,8 +841,8 @@ define(function () {
         var colDefs = opts.colDefs;
         var windowWidth=$(window).innerWidth();
         var col = null;
-//         opts.log(windowWidth);
-//         opts.log("tableWidth"+totalWidth)
+//         console.log(windowWidth);
+//         console.log("tableWidth"+totalWidth)
         if(totalWidth<= windowWidth){
             //show hidden columns in hidden Columns list
             while(hiddenCols.length >0){
@@ -898,7 +920,7 @@ define(function () {
 		if($('input#selectAll').is(":checked")){
     		$('input:checkbox[id=selectAll]').attr('checked',false);
     	} 
-         // opts.log(divId);
+         // console.log(divId);
         var $table = $("table#body_"+divId);
         // $table.html("Loading... ");
         var table = new Array();
@@ -921,7 +943,7 @@ define(function () {
     function buildBody(table,opts,rebuildFlag){
     	
         table.push('<tbody>');
-//          opts.log("Build Body "+opts.data.length);
+//          console.log("Build Body "+opts.data.length);
         if(opts.data.length === 0){
             var colSpan = opts.colDefs.length-hiddenCols.length;
             table.push("<tr id='"+id+"' class='mainRow'>");
@@ -979,7 +1001,7 @@ define(function () {
             table.push("</tr>");
         }
         table.push('</tbody>');                 
-//      // opts.log(table.join());
+//      // console.log(table.join());
     }
 
     function buildHeader(table,opts){
@@ -1063,8 +1085,8 @@ define(function () {
 //
 //    function log(obj){
 //        if(!debug) return;
-//        // // opts.log("Being called from"+arguments.callee.caller.toString())
-//        if(console && log)  // opts.log(obj);
+//        // // console.log("Being called from"+arguments.callee.caller.toString())
+//        if(console && log)  // console.log(obj);
 //        else    alert(obj.toString());
 //    }
 
