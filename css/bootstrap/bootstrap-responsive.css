@@ -113,6 +113,14 @@
     margin-left: -30px;
     *zoom: 1;
   }
+
+/* Defined for Komlimobile Enduser Analytics Dashboard tab view */
+  .row#dashboard ul,
+  .row#dashboard ol {
+  padding: 0 0 0 80%;
+  margin: 0 0 0 30px;
+  }
+
   .row:before,
   .row:after {
     display: table;

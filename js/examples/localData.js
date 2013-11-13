@@ -1,5 +1,5 @@
 
-require(['respo.grid'],function(gridObj) {
+require(['/js/src/respo.grid.js'],function(gridObj) {
 
 	function editLastName(val,row,handler){
 		console.log(row);

@@ -1,5 +1,5 @@
 
-require(['respo.grid'],function(gridObj) {
+require(['/js/src/respo.grid.js',"ajax-util"],function(gridObj,ajax) {
 
 	var config={  	
 			divId:"tableDiv",

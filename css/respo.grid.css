@@ -1,5 +1,5 @@
 body {
-	margin: 15px;
+	/*margin: 15px;*/
 }
 
 fieldset {
@@ -13,11 +13,31 @@ fieldset {
 	background-color: #eeeeee;
 }
 
-
-
-.respo_header_backdrop {
+.graybackdrop {
 	margin-top: 5px;
-	font-size: 14px;
+	font-size: 12px;
+	font-weight: bold;
+	color: inherit;
+	background-color: #eeeeee;
+	border: 1px solid #000000;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+
+.yellowbackdrop {
+	margin-top: 5px;
+	font-size: 12px;
+	background-color: #FFFF99;
+	border: 1px solid #999900;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+
+.bluebackdrop {
+	margin-top: 5px;
+	font-size: 12px;
 	background-color: gainsboro;
 }
 
@@ -35,7 +55,7 @@ fieldset {
 /*override bootstrap settings for tablebordered*/
 .table th {
 	padding: 8px;
-	line-height: 20px;
+	line-height: 16.5px;
 	text-align: center;
 	vertical-align: middle;
 	border-top: 1px solid #dddddd;
@@ -59,13 +79,13 @@ select.respo { /*width: 50px;
 
 select.respo_curr_page {
 	background: transparent;
-	width: 25px;
+	width: 50px;
 	vertical-align: middle;
 	padding: 0px;
 	border: 0;
 	border-radius: 0;
 	line-height: 1;
-	/*height: 20px;*/
+	height: 20px;
 	-webkit-appearance: none;
 }
 
@@ -74,9 +94,12 @@ select.respo_curr_page {
 	width: 35px;
 }
 
+.input-micro_bid {
+	width: 50px;
+}
 /*#d9edf7;*/
 th.respo_header_active{
-		/*background-color: lightgrey;*/
+		background-color: gainsboro;
 }
 /*div.respoGrid {*/ /* background: $bgcolor;
     border: 1px solid $bgcolor;*/ /*display: inline-block;
